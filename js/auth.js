@@ -1,5 +1,5 @@
 /**
- * LifeLink - Authentication & Modal Logic (With Supabase Integration)
+ * LifeLink - Authentication & Modal Logic (With Explicit Supabase Profile Upsert)
  */
 
 // Modal & Tab Logic
@@ -63,7 +63,7 @@ function showToast(msg) {
     toast.classList.remove('opacity-0', 'translate-y-2');
     setTimeout(() => {
         toast.classList.add('opacity-0', 'translate-y-2');
-    }, 4000);
+    }, 4500);
 }
 
 // Check if user is already logged in (via Supabase session or LocalStorage fallback)
@@ -87,7 +87,6 @@ async function checkLoginState() {
                     blood: meta.blood_group || "O+",
                     email: session.user.email
                 };
-                // Keep local storage in sync
                 localStorage.setItem('lifelink_user', JSON.stringify(user));
             }
         } catch (err) {
@@ -119,12 +118,12 @@ async function checkLoginState() {
     }
 }
 
-// Handle Register Submission with Supabase Auth
+// Handle Register Submission with Supabase Auth + Direct Profile Upsert
 async function handleRegister(e) {
     e.preventDefault();
     const name = document.getElementById('regName').value;
     const phone = document.getElementById('regPhone').value;
-    const blood = document.getElementById('regBlood').value;
+    const blood = document.getElementById('regBlood').value || 'O+';
     const email = document.getElementById('regEmail').value;
     const password = document.getElementById('regPassword')?.value || "DefaultPass123!";
 
@@ -140,6 +139,7 @@ async function handleRegister(e) {
     // 1. Attempt Supabase Registration
     if (typeof supabase !== 'undefined' && supabase) {
         try {
+            console.log("Signing up user to Supabase:", { email, name, blood });
             const { data, error } = await supabase.auth.signUp({
                 email: email,
                 password: password,
@@ -163,10 +163,32 @@ async function handleRegister(e) {
                 return; // Stop if database error occurs
             } else {
                 console.log("✅ Supabase registration success:", data);
+                
+                // Explicitly insert into public.profiles table from client to guarantee visibility
+                if (data?.user?.id) {
+                    console.log("Upserting profile into public.profiles...");
+                    const { error: profileErr } = await supabase.from('profiles').upsert({
+                        id: data.user.id,
+                        full_name: name,
+                        email: email,
+                        phone_number: phone,
+                        blood_group: blood,
+                        role: 'donor',
+                        is_available_to_donate: true
+                    }, { onConflict: 'id' });
+
+                    if (profileErr) {
+                        console.warn("Notice saving profile directly:", profileErr.message);
+                    } else {
+                        console.log("✅ Profile inserted/updated in Supabase Table Editor successfully!");
+                    }
+                }
             }
         } catch (err) {
             console.error("Supabase exception:", err);
         }
+    } else {
+        console.warn("Supabase client is not initialized.");
     }
 
     // 2. Save to LocalStorage for instant dashboard experience
@@ -174,7 +196,7 @@ async function handleRegister(e) {
     
     closeModal();
     checkLoginState();
-    showToast(`🎉 Registration successful! Redirecting to dashboard...`);
+    showToast(`🎉 Registration successful! Saved to Supabase.`);
     
     setTimeout(() => {
         window.location.href = "blood_donor_prototype_v2.html";

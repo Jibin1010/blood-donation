@@ -284,6 +284,23 @@ if (protoRegisterForm) {
                     return; // Stop if database error occurs
                 } else {
                     console.log("✅ Supabase registration success:", data);
+                    if (data?.user?.id) {
+                        console.log("Upserting profile into public.profiles...");
+                        const { error: profileErr } = await supabase.from('profiles').upsert({
+                            id: data.user.id,
+                            full_name: name,
+                            email: email,
+                            phone_number: phone,
+                            blood_group: blood || 'O+',
+                            role: 'donor',
+                            is_available_to_donate: true
+                        }, { onConflict: 'id' });
+                        if (profileErr) {
+                            console.warn("Notice saving profile directly:", profileErr.message);
+                        } else {
+                            console.log("✅ Profile inserted/updated in Supabase Table Editor successfully!");
+                        }
+                    }
                 }
             } catch (err) {
                 console.error("Supabase exception:", err);
