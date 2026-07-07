@@ -242,7 +242,60 @@ if (registerModal) {
     });
 }
 
-if (completeRegistrationBtn) {
+const protoRegisterForm = document.getElementById('protoRegisterForm');
+if (protoRegisterForm) {
+    protoRegisterForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const name = document.getElementById('protoRegName')?.value || "Anonymous Donor";
+        const phone = document.getElementById('protoRegPhone')?.value || "0000000000";
+        const blood = document.getElementById('protoRegBlood')?.value || "O+";
+        const email = document.getElementById('protoRegEmail')?.value || `donor_${Date.now()}@test.com`;
+        const password = document.getElementById('protoRegPassword')?.value || "DefaultPass123!";
+
+        const submitBtn = document.getElementById('completeRegistrationBtn');
+        const originalText = submitBtn ? submitBtn.textContent : "";
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Saving to Supabase...";
+        }
+
+        if (typeof supabase !== 'undefined' && supabase) {
+            try {
+                const { data, error } = await supabase.auth.signUp({
+                    email: email,
+                    password: password,
+                    options: {
+                        data: {
+                            full_name: name,
+                            phone_number: phone,
+                            blood_group: blood,
+                            role: 'donor'
+                        }
+                    }
+                });
+
+                if (error) {
+                    console.error("Supabase SignUp Error:", error.message);
+                    showToast(`⚠️ Supabase Error: ${error.message}`);
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = originalText;
+                    }
+                    return; // Stop if database error occurs
+                } else {
+                    console.log("✅ Supabase registration success:", data);
+                }
+            } catch (err) {
+                console.error("Supabase exception:", err);
+            }
+        }
+
+        localStorage.setItem('lifelink_user', JSON.stringify({ name, phone, blood, email }));
+        closeRegisterModal();
+        if (typeof checkLoginState === 'function') checkLoginState();
+        showToast("🎉 Supabase Registration Complete! Welcome.");
+    });
+} else if (completeRegistrationBtn) {
     completeRegistrationBtn.addEventListener('click', () => {
         closeRegisterModal();
         showToast("Registration Complete!");
