@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LifeLink - Hyper-local Emergency Donor Network</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            900: '#134e4a',
+                        },
+                        secondary: {
+                            50: '#fef2f2',
+                            500: '#ef4444',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans flex flex-col min-h-screen">
+
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex-shrink-0 flex items-center">
+                    <span class="text-2xl font-bold text-primary-600 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-secondary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="24" height="24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                        </svg>
+                        LifeLink
+                    </span>
+                </div>
+                <nav class="hidden md:flex space-x-8">
+                    <a href="#" class="text-gray-600 hover:text-primary-600 px-3 py-2 text-sm font-medium transition-colors">Home</a>
+                    <a href="#about" class="text-gray-600 hover:text-primary-600 px-3 py-2 text-sm font-medium transition-colors">About Us</a>
+                    <a href="#how-it-works" class="text-gray-600 hover:text-primary-600 px-3 py-2 text-sm font-medium transition-colors">How It Works</a>
+                    <a href="#partners" class="text-gray-600 hover:text-primary-600 px-3 py-2 text-sm font-medium transition-colors">Partners</a>
+                </nav>
+                <div class="hidden md:flex items-center">
+                    <button id="requestBloodBtn" class="bg-secondary-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm cursor-pointer">
+                        Request Blood
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow">
+        
+        <section class="bg-primary-50 py-16 sm:py-24">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h1 class="text-4xl sm:text-5xl font-extrabold text-gray-900 tracking-tight mb-6">
+                    Optimizing Emergency Healthcare
+                </h1>
+                <p class="mt-4 max-w-2xl text-lg sm:text-xl text-gray-600 mx-auto mb-8">
+                    Replacing scattered social media requests with a hyper-local network. We instantly match eligible donors based on real-time proximity and blood compatibility.
+                </p>
+                <div class="flex justify-center gap-4 flex-wrap">
+                    <button id="registerBtn" class="bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 rounded-lg text-base font-medium shadow-md transition-all">
+                        Register as Donor
+                    </button>
+                    <div class="flex flex-col items-center relative w-full sm:w-auto">
+                        <button id="findHospitalBtn" class="bg-white text-primary-600 border border-primary-200 hover:bg-gray-50 px-6 py-3 rounded-lg text-base font-medium shadow-sm transition-all w-full">
+                            Find a Hospital Near Me
+                        </button>
+                        <div id="hospitalListContainer" class="absolute top-full mt-2 w-full sm:w-80 bg-white rounded-lg shadow-xl border border-gray-100 hidden z-50 text-left overflow-hidden">
+                            <div class="p-3 bg-gray-50 border-b border-gray-100 text-xs font-semibold text-gray-500 uppercase tracking-wider" id="locationDisplay">Locating...</div>
+                            <ul id="hospitalList" class="max-h-60 overflow-y-auto divide-y divide-gray-100">
+                                <!-- Dummy hospitals populated by JS -->
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-8 flex flex-col sm:flex-row justify-center items-center gap-6">
+                    <button id="enableAlertsBtn" class="bg-secondary-50 text-secondary-500 border border-secondary-200 hover:bg-secondary-100 px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 shadow-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                        </svg>
+                        Enable Emergency Alerts
+                    </button>
+                    
+                    <div class="flex items-center gap-2 bg-white px-4 py-2 rounded-lg border border-gray-200 shadow-sm">
+                        <label for="bloodGroupSelect" class="text-gray-700 text-sm font-medium">My Blood Group:</label>
+                        <select id="bloodGroupSelect" class="border-none bg-transparent text-gray-700 font-bold focus:outline-none focus:ring-0 cursor-pointer">
+                            <option value="">Select</option>
+                            <option value="A+">A+</option>
+                            <option value="A-">A-</option>
+                            <option value="B+">B+</option>
+                            <option value="B-">B-</option>
+                            <option value="O+">O+</option>
+                            <option value="O-">O-</option>
+                            <option value="AB+">AB+</option>
+                            <option value="AB-">AB-</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="about" class="py-16 bg-white">
+            <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+                <article class="prose prose-lg prose-teal mx-auto">
+                    <h2>Our Mission</h2>
+                    <p>
+                        In critical emergencies, every second counts. Finding a blood donor through scattered social media posts is often inefficient and stressful. Our platform streamlines this process by creating a <strong>hyper-local network</strong> that connects those in need with those ready to help, instantly.
+                    </p>
+                    
+                    <h3>Who We Serve</h3>
+                    <ul>
+                        <li><strong>Patients' Families:</strong> Instantly broadcast urgent needs to eligible, nearby donors without relying on viral social media luck.</li>
+                        <li><strong>Volunteer Donors:</strong> Receive targeted, localized alerts when someone nearby urgently needs your specific blood type.</li>
+                        <li><strong>Local Hospitals & Blood Banks:</strong> Coordinate emergency supplies efficiently and manage local inventory with real-time donor matching.</li>
+                    </ul>
+
+                    <h3>Why It Matters</h3>
+                    <p>
+                        By focusing on <em>real-time proximity</em> and strict <em>blood compatibility</em>, we reduce the time it takes to find a donor from hours to minutes. This ensures that healthcare providers can focus on saving lives rather than searching for resources.
+                    </p>
+                </article>
+            </div>
+        </section>
+
+        <section id="how-it-works" class="py-16 bg-gray-50">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-3xl font-bold text-gray-900 text-center mb-12">How It Works</h2>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 feature-card transition-all duration-300">
+                        <div class="bg-primary-50 text-primary-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl font-bold">1</div>
+                        <h3 class="text-xl font-semibold mb-3 text-gray-800">Request</h3>
+                        <p class="text-gray-600 text-sm">Patient or hospital submits an emergency blood request detailing the requirement.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 feature-card transition-all duration-300">
+                        <div class="bg-primary-50 text-primary-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl font-bold">2</div>
+                        <h3 class="text-xl font-semibold mb-3 text-gray-800">Match</h3>
+                        <p class="text-gray-600 text-sm">Our system instantly finds nearby donors with compatible blood types.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 feature-card transition-all duration-300">
+                        <div class="bg-primary-50 text-primary-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl font-bold">3</div>
+                        <h3 class="text-xl font-semibold mb-3 text-gray-800">Alert</h3>
+                        <p class="text-gray-600 text-sm">Eligible local donors receive immediate push notifications on their devices.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 feature-card transition-all duration-300">
+                        <div class="bg-primary-50 text-primary-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl font-bold">4</div>
+                        <h3 class="text-xl font-semibold mb-3 text-gray-800">Connect</h3>
+                        <p class="text-gray-600 text-sm">Donor accepts the request and is directed to the medical facility to donate.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="active-requests" class="py-16 bg-white border-t border-gray-100">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center mb-8">
+                    <h2 class="text-3xl font-bold text-gray-900">Active Urgent Requests</h2>
+                    <span class="bg-red-100 text-red-800 text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1">
+                        <span class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+                        Live Feed
+                    </span>
+                </div>
+                <div id="requestsFeed" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Cards will be populated by JS -->
+                </div>
+            </div>
+        </section>
+
+        <section id="media-resources" class="py-16 bg-gray-100 border-t border-gray-200">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-3xl font-bold text-gray-900 text-center mb-12">Media & Resources</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                    
+                    <!-- Video Element -->
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col h-full">
+                        <h3 class="text-xl font-semibold mb-4 text-gray-800">Campaign Video</h3>
+                        <video controls class="w-full rounded-lg shadow-sm mb-4 flex-grow bg-black">
+                            <source src="https://commons.wikimedia.org/wiki/Special:FilePath/Save_life_Give_Blood.webm" type="video/webm">
+                            Your browser does not support HTML video.
+                        </video>
+                        <p class="text-sm text-gray-600 mt-auto">Watch our campaign video to understand how your contribution saves lives.</p>
+                    </div>
+                    
+                    <!-- Audio Element -->
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col h-full">
+                        <h3 class="text-xl font-semibold mb-4 text-gray-800">A Message from Our Doctors</h3>
+                        <div class="flex flex-col items-center justify-center p-8 bg-gray-50 rounded-lg border border-dashed border-gray-200 mb-4 flex-grow">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-primary-400 mb-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" /></svg>
+                            <audio controls class="w-full">
+                                <source src="./blood_donation_message.m4a" type="audio/mp4">
+                                Your browser does not support the audio element.
+                            </audio>
+                        </div>
+                        <p class="text-sm text-gray-600 mt-auto">Listen to a brief message regarding the importance of emergency blood donation.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="partners" class="py-16 bg-white border-t border-gray-100">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h2 class="text-3xl font-bold text-gray-900 mb-6">Our Trusted Partners</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto mb-12">We collaborate with leading healthcare providers and community organizations to ensure a safe, efficient, and reliable blood donation network.</p>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6 items-center">
+                    <div class="p-6 bg-gray-50 rounded-xl font-medium text-gray-500 shadow-sm border border-gray-100 hover:border-primary-200 transition-colors cursor-pointer">City General Hospital</div>
+                    <div class="p-6 bg-gray-50 rounded-xl font-medium text-gray-500 shadow-sm border border-gray-100 hover:border-primary-200 transition-colors cursor-pointer">Red Cross Society</div>
+                    <div class="p-6 bg-gray-50 rounded-xl font-medium text-gray-500 shadow-sm border border-gray-100 hover:border-primary-200 transition-colors cursor-pointer">Metro Blood Bank</div>
+                    <div class="p-6 bg-gray-50 rounded-xl font-medium text-gray-500 shadow-sm border border-gray-100 hover:border-primary-200 transition-colors cursor-pointer">Community Health Clinic</div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div>
+                <h4 class="text-xl font-bold flex items-center gap-2 mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-secondary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="24" height="24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                    </svg>
+                    LifeLink
+                </h4>
+                <p class="text-gray-400 text-sm">
+                    Connecting communities to optimize emergency healthcare and save lives through smart, localized donor matching.
+                </p>
+            </div>
+            <div>
+                <h4 class="text-lg font-semibold mb-4">Quick Links</h4>
+                <ul class="space-y-2 text-sm text-gray-400">
+                    <li><a href="#" class="hover:text-white transition-colors">Home</a></li>
+                    <li><a href="#about" class="hover:text-white transition-colors">About Us</a></li>
+                    <li><a href="#how-it-works" class="hover:text-white transition-colors">How It Works</a></li>
+                    <li><a href="#partners" class="hover:text-white transition-colors">Partners</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-lg font-semibold mb-4">Contact</h4>
+                <ul class="space-y-2 text-sm text-gray-400">
+                    <li class="flex items-center gap-2">
+                        Email: <span id="contactEmail">jbnjijo@gmail.com</span>
+                        <button onclick="copyToClipboard('contactEmail')" class="text-gray-500 hover:text-white transition-colors" title="Copy Email">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                        </button>
+                    </li>
+                    <li class="flex items-center gap-2">
+                        Emergency Line: <span id="contactPhone">9207293021</span>
+                        <button onclick="copyToClipboard('contactPhone')" class="text-gray-500 hover:text-white transition-colors" title="Copy Phone">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                        </button>
+                    </li>
+                    <li>Bangalore, India</li>
+                </ul>
+            </div>
+        </div>
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 pt-8 border-t border-gray-800 text-center text-sm text-gray-500">
+            &copy; 2026 LifeLink Network. All rights reserved.
+        </div>
+    </footer>
+
+    <!-- Request Blood Modal -->
+    <div id="requestModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden items-center justify-center z-[100] px-4">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 flex-shrink-0">
+                <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-500" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" />
+                    </svg>
+                    Urgent Blood Request
+                </h3>
+                <button id="closeRequestBtn" class="text-gray-400 hover:text-gray-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto">
+                <form id="requestBloodForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Patient Name</label>
+                        <input type="text" id="reqPatientName" required class="w-full border border-gray-300 p-2 rounded-md focus:border-secondary-500 focus:ring-secondary-500 outline-none transition-colors" placeholder="e.g. Jane Doe">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Blood Type Needed</label>
+                        <select id="reqBloodType" required class="w-full border border-gray-300 p-2 rounded-md focus:border-secondary-500 focus:ring-secondary-500 outline-none transition-colors">
+                            <option value="">Select Blood Type</option>
+                            <option value="A+">A+</option>
+                            <option value="A-">A-</option>
+                            <option value="B+">B+</option>
+                            <option value="B-">B-</option>
+                            <option value="O+">O+</option>
+                            <option value="O-">O-</option>
+                            <option value="AB+">AB+</option>
+                            <option value="AB-">AB-</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Hospital / Location</label>
+                        <select id="reqHospital" required class="w-full border border-gray-300 p-2 rounded-md focus:border-secondary-500 focus:ring-secondary-500 outline-none transition-colors">
+                            <option value="">Select Hospital</option>
+                            <option value="City General Hospital">City General Hospital</option>
+                            <option value="Metro Blood Bank">Metro Blood Bank</option>
+                            <option value="Community Health Clinic">Community Health Clinic</option>
+                        </select>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Units Needed</label>
+                            <input type="number" id="reqUnits" min="1" max="10" required class="w-full border border-gray-300 p-2 rounded-md focus:border-secondary-500 focus:ring-secondary-500 outline-none transition-colors" placeholder="1">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Contact Phone</label>
+                            <input type="tel" id="reqPhone" required pattern="[0-9]{10}" class="w-full border border-gray-300 p-2 rounded-md focus:border-secondary-500 focus:ring-secondary-500 outline-none transition-colors" placeholder="10-digit number">
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full bg-secondary-500 hover:bg-red-600 text-white font-medium py-3 px-4 rounded-md mt-6 transition-colors shadow-sm flex justify-center items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                        </svg>
+                        Broadcast Request Now
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Checklist Modal -->
+    <div id="checklistModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden items-center justify-center z-[110] px-4">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden flex flex-col transform transition-all scale-95 opacity-0 duration-300" id="checklistModalContent">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                <div class="flex items-center gap-2 text-primary-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>
+                    <h3 class="text-lg font-bold text-gray-800">Donation Checklist</h3>
+                </div>
+                <button id="closeChecklistBtn" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            <div class="p-6">
+                <p class="text-sm text-gray-600 mb-5">Thank you for accepting this urgent request! Please follow these steps to complete the donation process.</p>
+                <div class="space-y-3">
+                    <label class="flex items-start gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                        <input type="checkbox" class="checklist-step mt-1 w-5 h-5 text-primary-600 border-gray-300 rounded focus:ring-primary-500">
+                        <div>
+                            <p class="font-semibold text-gray-800 text-sm">Travel to the hospital</p>
+                            <p class="text-xs text-gray-500 mt-0.5">Head to the specified location safely.</p>
+                        </div>
+                    </label>
+                    <label class="flex items-start gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                        <input type="checkbox" class="checklist-step mt-1 w-5 h-5 text-primary-600 border-gray-300 rounded focus:ring-primary-500">
+                        <div>
+                            <p class="font-semibold text-gray-800 text-sm">Complete Screening</p>
+                            <p class="text-xs text-gray-500 mt-0.5">Undergo the quick medical check at the desk.</p>
+                        </div>
+                    </label>
+                    <label class="flex items-start gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                        <input type="checkbox" class="checklist-step mt-1 w-5 h-5 text-primary-600 border-gray-300 rounded focus:ring-primary-500">
+                        <div>
+                            <p class="font-semibold text-gray-800 text-sm">Donate & Rest</p>
+                            <p class="text-xs text-gray-500 mt-0.5">Give blood and rest for 15 minutes with refreshments.</p>
+                        </div>
+                    </label>
+                </div>
+                <button id="finishDonationBtn" disabled class="w-full bg-gray-300 text-gray-500 cursor-not-allowed font-bold py-3 px-4 rounded-md mt-6 transition-colors shadow-sm flex justify-center items-center gap-2">
+                    Complete All Steps First (3 left)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Registration Modal (Drag and Drop / File API) -->
+    <div id="registerModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden items-center justify-center z-[100] px-4">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden flex flex-col">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                <h3 class="text-lg font-bold text-gray-800">Register as Donor</h3>
+                <button id="closeModalBtn" class="text-gray-400 hover:text-gray-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            <div class="p-6">
+                <p class="text-sm text-gray-600 mb-4">Please upload a valid photo ID (Drag and drop or click to select).</p>
+                
+                <div id="dropZone" class="border-2 border-dashed border-primary-200 rounded-lg p-8 text-center hover:bg-primary-50 transition-colors cursor-pointer relative">
+                    <input type="file" id="fileInput" class="hidden" accept="image/*">
+                    <div id="dropZoneContent">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-primary-400 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
+                        <p class="text-sm font-medium text-gray-700">Drag & Drop ID image here</p>
+                        <p class="text-xs text-gray-500 mt-1">or click to browse</p>
+                    </div>
+                    <div id="imagePreviewContainer" class="hidden mt-4">
+                        <img id="imagePreview" src="" alt="ID Preview" class="mx-auto max-h-32 rounded border border-gray-200">
+                        <p class="text-xs text-green-600 mt-2 font-medium">File ready!</p>
+                    </div>
+                </div>
+
+                <button id="completeRegistrationBtn" class="w-full bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-md mt-6 transition-colors">
+                    Complete Registration
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Eligibility Screener Modal (Zero-Data) -->
+    <div id="eligibilityModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden items-center justify-center z-[100] px-4">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 flex-shrink-0">
+                <h3 class="text-lg font-bold text-gray-800">Eligibility Screener</h3>
+                <button id="closeEligibilityBtn" class="text-gray-400 hover:text-gray-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+
+            <div class="p-6 overflow-y-auto">
+                <div id="screenerFormContainer">
+                    <div class="bg-blue-50 text-blue-800 p-3 rounded-lg text-sm mb-6 flex gap-2 items-start">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                        <p><strong>Zero-Data Guarantee:</strong> Your answers are evaluated completely offline by your browser and never leave your device.</p>
+                    </div>
+                    <form id="eligibilityForm" class="space-y-5">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Full Name</label>
+                            <input type="text" id="fullNameInput" name="fullName" maxlength="50" class="w-full border border-gray-300 p-2 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500 transition-colors outline-none" placeholder="e.g. John Doe" required>
+                            <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                <span id="nameDisplay"></span>
+                                <span id="charCount">0/50 characters</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Are you between 18 and 65 years old?</label>
+                            <div class="flex gap-6">
+                                <label class="inline-flex items-center cursor-pointer">
+                                    <input type="radio" name="age" value="yes" required class="w-4 h-4 text-primary-600 focus:ring-primary-500 border-gray-300">
+                                    <span class="ml-2 text-gray-700">Yes</span>
+                                </label>
+                                <label class="inline-flex items-center cursor-pointer">
+                                    <input type="radio" name="age" value="no" class="w-4 h-4 text-primary-600 focus:ring-primary-500 border-gray-300">
+                                    <span class="ml-2 text-gray-700">No</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Do you weigh more than 50kg (110 lbs)?</label>
+                            <div class="flex gap-6">
+                                <label class="inline-flex items-center cursor-pointer">
+                                    <input type="radio" name="weight" value="yes" required class="w-4 h-4 text-primary-600 focus:ring-primary-500 border-gray-300">
+                                    <span class="ml-2 text-gray-700">Yes</span>
+                                </label>
+                                <label class="inline-flex items-center cursor-pointer">
+                                    <input type="radio" name="weight" value="no" class="w-4 h-4 text-primary-600 focus:ring-primary-500 border-gray-300">
+                                    <span class="ml-2 text-gray-700">No</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Are you feeling well and healthy today?</label>
+                            <div class="flex gap-6">
+                                <label class="inline-flex items-center cursor-pointer">
+                                    <input type="radio" name="health" value="yes" required class="w-4 h-4 text-primary-600 focus:ring-primary-500 border-gray-300">
+                                    <span class="ml-2 text-gray-700">Yes</span>
+                                </label>
+                                <label class="inline-flex items-center cursor-pointer">
+                                    <input type="radio" name="health" value="no" class="w-4 h-4 text-primary-600 focus:ring-primary-500 border-gray-300">
+                                    <span class="ml-2 text-gray-700">No</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Have you had a tattoo or piercing in the last 6 months?</label>
+                            <div class="flex gap-6">
+                                <label class="inline-flex items-center cursor-pointer">
+                                    <input type="radio" name="tattoo" value="yes" required class="w-4 h-4 text-primary-600 focus:ring-primary-500 border-gray-300">
+                                    <span class="ml-2 text-gray-700">Yes</span>
+                                </label>
+                                <label class="inline-flex items-center cursor-pointer">
+                                    <input type="radio" name="tattoo" value="no" class="w-4 h-4 text-primary-600 focus:ring-primary-500 border-gray-300">
+                                    <span class="ml-2 text-gray-700">No</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Have you ever tested positive for HIV/AIDS or Hepatitis B/C?</label>
+                            <div class="flex gap-6">
+                                <label class="inline-flex items-center cursor-pointer">
+                                    <input type="radio" name="hiv" value="yes" required class="w-4 h-4 text-primary-600 focus:ring-primary-500 border-gray-300">
+                                    <span class="ml-2 text-gray-700">Yes</span>
+                                </label>
+                                <label class="inline-flex items-center cursor-pointer">
+                                    <input type="radio" name="hiv" value="no" class="w-4 h-4 text-primary-600 focus:ring-primary-500 border-gray-300">
+                                    <span class="ml-2 text-gray-700">No</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Have you had major surgery or received a blood transfusion in the past 12 months?</label>
+                            <div class="flex gap-6">
+                                <label class="inline-flex items-center cursor-pointer">
+                                    <input type="radio" name="surgery" value="yes" required class="w-4 h-4 text-primary-600 focus:ring-primary-500 border-gray-300">
+                                    <span class="ml-2 text-gray-700">Yes</span>
+                                </label>
+                                <label class="inline-flex items-center cursor-pointer">
+                                    <input type="radio" name="surgery" value="no" class="w-4 h-4 text-primary-600 focus:ring-primary-500 border-gray-300">
+                                    <span class="ml-2 text-gray-700">No</span>
+                                </label>
+                            </div>
+                        </div>
+                        <button type="submit" class="w-full bg-primary-600 hover:bg-primary-700 text-white font-medium py-3 px-4 rounded-md mt-6 transition-colors shadow-sm">
+                            Evaluate Eligibility
+                        </button>
+                    </form>
+                </div>
+                <div id="screenerResultContainer" class="hidden text-center py-6">
+                    <!-- Result inserted via JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-4 right-4 bg-gray-800 text-white px-4 py-3 rounded shadow-lg transition-opacity duration-300 opacity-0 pointer-events-none z-50 flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
+        <span id="toastMessage"></span>
+    </div>
+
+    <script>
+        // 1. Geolocation API & Dummy Data for Hospitals
+        const findHospitalBtn = document.getElementById('findHospitalBtn');
+        const locationDisplay = document.getElementById('locationDisplay');
+        const hospitalListContainer = document.getElementById('hospitalListContainer');
+        const hospitalList = document.getElementById('hospitalList');
+
+        const dummyHospitals = [
+            { name: "City General Hospital", dist: "1.2 km" },
+            { name: "Metro Blood Bank", dist: "3.4 km" },
+            { name: "Community Health Clinic", dist: "5.1 km" }
+        ];
+
+        findHospitalBtn.addEventListener('click', () => {
+            if (!hospitalListContainer.classList.contains('hidden') && findHospitalBtn.textContent === "Close Hospital List") {
+                hospitalListContainer.classList.add('hidden');
+                findHospitalBtn.textContent = "Find a Hospital Near Me";
+                return;
+            }
+
+            if ("geolocation" in navigator) {
+                findHospitalBtn.textContent = "Locating...";
+                hospitalListContainer.classList.remove('hidden');
+                hospitalList.innerHTML = `<li class="p-4 text-sm text-gray-500 text-center">Requesting permission...</li>`;
+                
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const lat = position.coords.latitude.toFixed(4);
+                        const lon = position.coords.longitude.toFixed(4);
+                        findHospitalBtn.textContent = "Close Hospital List";
+                        locationDisplay.textContent = `Your Location: ${lat}, ${lon}`;
+                        
+                        hospitalList.innerHTML = '';
+                        // Get user's selected blood group from the dropdown
+                        const userBloodGroup = document.getElementById('bloodGroupSelect').value;
+
+                        dummyHospitals.forEach(h => {
+                            let requestsHTML = '';
+                            let urgentBadge = '';
+                            let isUserTypeNeeded = false;
+                            
+                            if (typeof activeRequestsFeed !== 'undefined') {
+                                // Filter active requests for this specific hospital
+                                const hospitalRequests = activeRequestsFeed.filter(req => req.hospital === h.name);
+                                
+                                if (hospitalRequests.length > 0) {
+                                    requestsHTML = `<div class="w-full mt-2 space-y-2 border-t border-gray-100 pt-2">`;
+                                    hospitalRequests.forEach(req => {
+                                        const urgencyColor = req.urgency === 'Critical' ? 'text-red-700 bg-red-100' : (req.urgency === 'High' ? 'text-orange-700 bg-orange-100' : 'text-blue-700 bg-blue-100');
+                                        const isMatch = userBloodGroup && req.type === userBloodGroup;
+                                        if (isMatch) isUserTypeNeeded = true;
+                                        
+                                        requestsHTML += `
+                                            <div class="${isMatch ? 'bg-red-50 border-red-200 shadow-sm' : 'bg-gray-50 border-gray-200'} p-2 rounded border flex flex-col gap-1 transition-all">
+                                                <div class="flex justify-between items-center">
+                                                    <span class="text-xs font-semibold text-gray-800">${req.name} <span class="${isMatch ? 'text-red-600 font-bold' : 'text-gray-500'}">(${req.type})</span></span>
+                                                    <span class="text-[10px] font-bold px-1.5 py-0.5 rounded ${urgencyColor} uppercase">${req.urgency}</span>
+                                                </div>
+                                                <div class="flex justify-between items-center text-[10px] text-gray-500">
+                                                    <span>${req.units} Units Needed</span>
+                                                    <span>${req.time}</span>
+                                                </div>
+                                            </div>
+                                        `;
+                                    });
+                                    requestsHTML += `</div>`;
+                                }
+                            }
+
+                            if (isUserTypeNeeded) {
+                                urgentBadge = `<span class="ml-2 bg-red-100 text-red-700 text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse border border-red-200">Needs ${userBloodGroup}!</span>`;
+                            }
+
+                            hospitalList.innerHTML += `
+                                <li class="p-3 hover:bg-gray-50 cursor-pointer flex flex-col items-start transition-colors border-l-4 border-transparent hover:border-primary-500">
+                                    <div class="flex justify-between items-center w-full">
+                                        <div class="flex items-center flex-wrap gap-1">
+                                            <span class="font-bold text-gray-800">${h.name}</span>
+                                            ${urgentBadge}
+                                        </div>
+                                        <span class="text-xs text-primary-700 bg-primary-100 px-2 py-1 rounded font-bold whitespace-nowrap ml-2">${h.dist}</span>
+                                    </div>
+                                    ${requestsHTML}
+                                </li>
+                            `;
+                        });
+                    },
+                    (error) => {
+                        findHospitalBtn.textContent = "Find a Hospital Near Me";
+                        hospitalListContainer.classList.add('hidden');
+                        alert("Error getting location: " + error.message);
+                    }
+                );
+            } else {
+                alert("Geolocation is not supported by your browser.");
+            }
+        });
+
+        // 2. Web Notifications API
+        const enableAlertsBtn = document.getElementById('enableAlertsBtn');
+        
+        function updateAlertsButtonUI() {
+            if ("Notification" in window && Notification.permission === "granted") {
+                enableAlertsBtn.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                    </svg>
+                    Alerts Enabled
+                `;
+                enableAlertsBtn.classList.remove('bg-secondary-50', 'text-secondary-500', 'border-secondary-200', 'hover:bg-secondary-100');
+                enableAlertsBtn.classList.add('bg-green-50', 'text-green-600', 'border-green-200');
+            }
+        }
+        
+        updateAlertsButtonUI();
+        
+        enableAlertsBtn.addEventListener('click', async () => {
+            if (!("Notification" in window)) {
+                alert("This browser does not support desktop notification");
+                return;
+            }
+
+            if (Notification.permission === "granted") {
+                showToast("You are already subscribed to alerts!");
+            } else if (Notification.permission !== "denied") {
+                const permission = await Notification.requestPermission();
+                if (permission === "granted") {
+                    new Notification("LifeLink Alerts Enabled", {
+                        body: "URGENT: Test Alert - O+ Blood needed at City General Hospital!"
+                    });
+                    updateAlertsButtonUI();
+                    showToast("Alerts Enabled!");
+                }
+            }
+        });
+
+        // 3. Local Storage API
+        const bloodGroupSelect = document.getElementById('bloodGroupSelect');
+        
+        // Load saved preference
+        const savedBloodGroup = localStorage.getItem('userBloodGroup');
+        if (savedBloodGroup) {
+            bloodGroupSelect.value = savedBloodGroup;
+        }
+
+        // Save preference on change
+        bloodGroupSelect.addEventListener('change', (e) => {
+            const val = e.target.value;
+            if (val) {
+                localStorage.setItem('userBloodGroup', val);
+                showToast(`Blood group ${val} saved!`);
+            } else {
+                localStorage.removeItem('userBloodGroup');
+            }
+            // Re-render feed instantly to sort matches to the top
+            if (typeof renderActiveRequests === 'function') {
+                renderActiveRequests();
+            }
+        });
+
+        // 4. Clipboard API
+        function copyToClipboard(elementId) {
+            const text = document.getElementById(elementId).textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast("Copied to clipboard!");
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+            });
+        }
+
+        // Helper for Toast (UI feedback)
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMessage').textContent = msg;
+            toast.classList.remove('opacity-0');
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+            }, 3000);
+        }
+
+        // 5. Drag and Drop API & File API
+        const registerBtn = document.getElementById('registerBtn');
+        const registerModal = document.getElementById('registerModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const completeRegistrationBtn = document.getElementById('completeRegistrationBtn');
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const imagePreview = document.getElementById('imagePreview');
+        const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+        const dropZoneContent = document.getElementById('dropZoneContent');
+
+        function resetModalState() {
+            imagePreview.src = '';
+            imagePreviewContainer.classList.add('hidden');
+            dropZoneContent.classList.remove('hidden');
+            fileInput.value = '';
+        }
+
+        function closeRegisterModal() {
+            registerModal.classList.add('hidden');
+            registerModal.classList.remove('flex');
+            resetModalState();
+        }
+
+        function openRegisterModal() {
+            registerModal.classList.remove('hidden');
+            registerModal.classList.add('flex');
+        }
+
+        closeModalBtn.addEventListener('click', closeRegisterModal);
+
+        // Close modal when clicking outside
+        registerModal.addEventListener('click', (e) => {
+            if (e.target === registerModal) {
+                closeRegisterModal();
+            }
+        });
+
+        completeRegistrationBtn.addEventListener('click', () => {
+            closeRegisterModal();
+            showToast("Registration Complete!");
+        });
+
+        // Drag and Drop Events
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight(e) {
+            dropZone.classList.add('bg-primary-100', 'border-primary-400');
+        }
+
+        function unhighlight(e) {
+            dropZone.classList.remove('bg-primary-100', 'border-primary-400');
+        }
+
+        dropZone.addEventListener('drop', handleDrop, false);
+        
+        // Click to upload
+        dropZone.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', function() {
+            handleFiles(this.files);
+        });
+
+        function handleDrop(e) {
+            let dt = e.dataTransfer;
+            let files = dt.files;
+            handleFiles(files);
+        }
+
+        function handleFiles(files) {
+            if (files.length > 0) {
+                const file = files[0];
+                
+                // Only process image files.
+                if (!file.type.match('image.*')) {
+                    alert("Please upload an image file.");
+                    return;
+                }
+
+                // File API: FileReader to preview the image
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    imagePreview.src = e.target.result;
+                    imagePreviewContainer.classList.remove('hidden');
+                    dropZoneContent.classList.add('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // 6. Zero-Data Eligibility Screener (Client-side logic)
+        const eligibilityModal = document.getElementById('eligibilityModal');
+        const closeEligibilityBtn = document.getElementById('closeEligibilityBtn');
+        const eligibilityForm = document.getElementById('eligibilityForm');
+        const screenerFormContainer = document.getElementById('screenerFormContainer');
+        const screenerResultContainer = document.getElementById('screenerResultContainer');
+
+        function closeEligibilityModal() {
+            eligibilityModal.classList.add('hidden');
+            eligibilityModal.classList.remove('flex');
+            // Reset form for next time after a short delay for animation smoothness
+            setTimeout(() => {
+                eligibilityForm.reset();
+                screenerFormContainer.classList.remove('hidden');
+                screenerResultContainer.classList.add('hidden');
+                screenerResultContainer.innerHTML = '';
+            }, 300);
+        }
+
+        // Register button opens Eligibility Screener first
+        registerBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            eligibilityModal.classList.remove('hidden');
+            eligibilityModal.classList.add('flex');
+        });
+
+        closeEligibilityBtn.addEventListener('click', closeEligibilityModal);
+
+        eligibilityModal.addEventListener('click', (e) => {
+            if (e.target === eligibilityModal) {
+                closeEligibilityModal();
+            }
+        });
+
+        eligibilityForm.addEventListener('submit', (e) => {
+            e.preventDefault(); // Prevents sending data to a server
+
+            const formData = new FormData(eligibilityForm);
+            const age = formData.get('age');
+            const weight = formData.get('weight');
+            const health = formData.get('health');
+            const tattoo = formData.get('tattoo');
+            const hiv = formData.get('hiv');
+            const surgery = formData.get('surgery');
+
+            let isEligible = true;
+            let reason = "";
+
+            if (age === 'no') { isEligible = false; reason = "You must be between 18 and 65 years old to donate."; }
+            else if (weight === 'no') { isEligible = false; reason = "You must weigh at least 50kg (110 lbs) to donate safely."; }
+            else if (health === 'no') { isEligible = false; reason = "You must be feeling completely well and healthy today to donate."; }
+            else if (tattoo === 'yes') { isEligible = false; reason = "You must wait 6 months after getting a new tattoo or piercing to donate blood."; }
+            else if (hiv === 'yes') { isEligible = false; reason = "Individuals who have tested positive for HIV/AIDS or Hepatitis cannot donate blood."; }
+            else if (surgery === 'yes') { isEligible = false; reason = "You must wait 12 months after major surgery or a blood transfusion before donating."; }
+
+            screenerFormContainer.classList.add('hidden');
+            screenerResultContainer.classList.remove('hidden');
+
+            if (isEligible) {
+                screenerResultContainer.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-20 w-20 text-green-500 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <h4 class="text-2xl font-bold text-gray-800 mb-2">Cleared to Donate!</h4>
+                    <p class="text-gray-600 mb-8">Based on your answers, you are eligible to donate blood today. Your privacy has been maintained as no data left your device.</p>
+                    <button onclick="document.getElementById('closeEligibilityBtn').click(); openRegisterModal();" class="w-full bg-primary-600 hover:bg-primary-700 text-white font-medium py-3 px-6 rounded-md transition-colors shadow-md">
+                        Proceed to Registration
+                    </button>
+                `;
+            } else {
+                screenerResultContainer.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-20 w-20 text-secondary-500 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <h4 class="text-2xl font-bold text-gray-800 mb-2">Not Eligible at This Time</h4>
+                    <p class="text-gray-700 font-medium mb-4">${reason}</p>
+                    <p class="text-sm text-gray-500 mb-8">Thank you for your willingness to help. Please try again when these conditions change.</p>
+                    <button onclick="document.getElementById('closeEligibilityBtn').click();" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-3 px-6 rounded-md transition-colors">
+                        Close
+                    </button>
+                `;
+            }
+        });
+
+        // 7. Request Blood Modal Logic
+        const requestBloodBtn = document.getElementById('requestBloodBtn');
+        const requestModal = document.getElementById('requestModal');
+        const closeRequestBtn = document.getElementById('closeRequestBtn');
+        const requestBloodForm = document.getElementById('requestBloodForm');
+
+        function closeRequestModal() {
+            requestModal.classList.add('hidden');
+            requestModal.classList.remove('flex');
+            setTimeout(() => {
+                requestBloodForm.reset();
+            }, 300);
+        }
+
+        requestBloodBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            requestModal.classList.remove('hidden');
+            requestModal.classList.add('flex');
+        });
+
+        closeRequestBtn.addEventListener('click', closeRequestModal);
+
+        requestModal.addEventListener('click', (e) => {
+            if (e.target === requestModal) {
+                closeRequestModal();
+            }
+        });
+
+        // Dummy Feed Data
+        let activeRequestsFeed = [
+            { id: 1, name: "Baby Aria", type: "O-", hospital: "City General Hospital", units: 2, urgency: "Critical", time: "10 mins ago" },
+            { id: 2, name: "Rajesh Kumar", type: "AB+", hospital: "Metro Blood Bank", units: 1, urgency: "High", time: "25 mins ago" },
+            { id: 3, name: "Sarah Jenkins", type: "A+", hospital: "Community Health Clinic", units: 3, urgency: "Medium", time: "1 hour ago" }
+        ];
+
+        const requestsFeedContainer = document.getElementById('requestsFeed');
+
+        function renderActiveRequests() {
+            if(!requestsFeedContainer) return;
+            requestsFeedContainer.innerHTML = '';
+            
+            const userBloodGroup = document.getElementById('bloodGroupSelect')?.value;
+            
+            // Create a sorted copy of the feed based on match
+            const sortedFeed = [...activeRequestsFeed].sort((a, b) => {
+                const aMatch = userBloodGroup && a.type === userBloodGroup ? 1 : 0;
+                const bMatch = userBloodGroup && b.type === userBloodGroup ? 1 : 0;
+                return bMatch - aMatch; // descending order, matches first
+            });
+
+            sortedFeed.forEach(req => {
+                const urgencyColor = req.urgency === 'Critical' ? 'text-red-600 bg-red-50' : (req.urgency === 'High' ? 'text-orange-600 bg-orange-50' : 'text-blue-600 bg-blue-50');
+                const isMatch = userBloodGroup && req.type === userBloodGroup;
+                const isAccepted = req.accepted;
+                
+                let buttonHTML = '';
+                if (isAccepted) {
+                    const pending = 3 - (req.completedSteps || 0);
+                    buttonHTML = `<button class="text-sm font-medium text-white bg-yellow-500 hover:bg-yellow-600 px-3 py-1.5 rounded transition-colors" onclick="openChecklist(${req.id})">Checklist (${pending} pending)</button>`;
+                } else {
+                    buttonHTML = `<button class="text-sm font-medium ${isMatch ? 'text-white bg-red-600 hover:bg-red-700' : 'text-primary-600 bg-primary-50 hover:bg-primary-100'} px-3 py-1.5 rounded transition-colors" onclick="acceptRequest(${req.id})">Accept Request</button>`;
+                }
+
+                let cardStyles = isMatch ? 'bg-red-50 border-red-200 shadow-md transform scale-[1.02]' : 'bg-white border-gray-100 shadow-sm hover:shadow-md';
+                if (isAccepted) {
+                    cardStyles = 'bg-yellow-50 border-yellow-300 shadow-md transform scale-[1.02]';
+                }
+
+                let statusBadge = isMatch && !isAccepted ? '• Match Found!' : '';
+                if (isAccepted) statusBadge = '• IN PROGRESS';
+
+                requestsFeedContainer.innerHTML += `
+                    <div class="${cardStyles} border rounded-xl p-5 transition-all relative overflow-hidden group">
+                        <div class="absolute top-0 left-0 w-1 h-full ${req.urgency === 'Critical' && !isAccepted ? 'bg-red-500' : (isAccepted ? 'bg-yellow-400' : 'bg-primary-500')}"></div>
+                        <div class="flex justify-between items-start mb-3">
+                            <div>
+                                <h4 class="font-bold text-gray-900">${req.name}</h4>
+                                <p class="text-xs ${isMatch || isAccepted ? 'text-red-500 font-bold' : 'text-gray-500'} mt-1">${req.time} ${statusBadge}</p>
+                            </div>
+                            <span class="px-3 py-1 rounded-full text-sm font-bold ${isMatch || isAccepted ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-800'} border ${isMatch || isAccepted ? 'border-red-200' : 'border-gray-200'}">${req.type}</span>
+                        </div>
+                        <div class="text-sm ${isMatch || isAccepted ? 'text-red-800' : 'text-gray-600'} flex items-center gap-2 mb-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ${isMatch || isAccepted ? 'text-red-400' : 'text-gray-400'}" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+                            ${req.hospital}
+                        </div>
+                        <div class="text-sm ${isMatch || isAccepted ? 'text-red-800' : 'text-gray-600'} flex items-center gap-2 mb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ${isMatch || isAccepted ? 'text-red-400' : 'text-gray-400'}" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
+                            ${req.units} Units Needed
+                        </div>
+                        <div class="flex items-center justify-between mt-4">
+                            <span class="text-xs font-semibold px-2 py-1 rounded ${urgencyColor}">${req.urgency}</span>
+                            ${buttonHTML}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // Handle Accepting a Request
+        const checklistModal = document.getElementById('checklistModal');
+        const checklistModalContent = document.getElementById('checklistModalContent');
+        const closeChecklistBtn = document.getElementById('closeChecklistBtn');
+        const finishDonationBtn = document.getElementById('finishDonationBtn');
+        let currentChecklistReqId = null;
+
+        function acceptRequest(id) {
+            const req = activeRequestsFeed.find(r => r.id === id);
+            if (req) {
+                req.accepted = true;
+                req.completedSteps = 0;
+            }
+            renderActiveRequests();
+            openChecklist(id);
+        }
+
+        function openChecklist(id) {
+            currentChecklistReqId = id;
+            const req = activeRequestsFeed.find(r => r.id === id);
+            if (!req) return;
+
+            // Reset checkboxes
+            const steps = req.completedSteps || 0;
+            const checkboxes = document.querySelectorAll('.checklist-step');
+            checkboxes.forEach((cb, index) => {
+                cb.checked = index < steps;
+            });
+            updateFinishButtonState();
+
+            // Show Checklist Modal
+            checklistModal.classList.remove('hidden');
+            checklistModal.classList.add('flex');
+            setTimeout(() => {
+                checklistModalContent.classList.remove('scale-95', 'opacity-0');
+                checklistModalContent.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        // Add event listeners to checkboxes
+        const checkboxes = document.querySelectorAll('.checklist-step');
+        checkboxes.forEach((cb) => {
+            cb.addEventListener('change', () => {
+                if (currentChecklistReqId) {
+                    const req = activeRequestsFeed.find(r => r.id === currentChecklistReqId);
+                    if (req) {
+                        let count = 0;
+                        checkboxes.forEach(c => { if(c.checked) count++; });
+                        req.completedSteps = count;
+                        updateFinishButtonState();
+                        renderActiveRequests();
+                    }
+                }
+            });
+        });
+
+        function updateFinishButtonState() {
+            let count = 0;
+            checkboxes.forEach(c => { if(c.checked) count++; });
+            if (count === 3) {
+                finishDonationBtn.disabled = false;
+                finishDonationBtn.className = "w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-md mt-6 transition-colors shadow-sm flex justify-center items-center gap-2";
+                finishDonationBtn.textContent = "Mark as Completed";
+            } else {
+                finishDonationBtn.disabled = true;
+                finishDonationBtn.className = "w-full bg-gray-300 text-gray-500 cursor-not-allowed font-bold py-3 px-4 rounded-md mt-6 transition-colors shadow-sm flex justify-center items-center gap-2";
+                finishDonationBtn.textContent = `Complete All Steps First (${3 - count} left)`;
+            }
+        }
+
+        function closeChecklist() {
+            checklistModalContent.classList.remove('scale-100', 'opacity-100');
+            checklistModalContent.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                checklistModal.classList.add('hidden');
+                checklistModal.classList.remove('flex');
+            }, 300);
+            currentChecklistReqId = null;
+        }
+
+        closeChecklistBtn.addEventListener('click', closeChecklist);
+        
+        finishDonationBtn.addEventListener('click', () => {
+            if (currentChecklistReqId) {
+                // Now we remove it from the list completely
+                activeRequestsFeed = activeRequestsFeed.filter(req => req.id !== currentChecklistReqId);
+                renderActiveRequests();
+                
+                // Refresh hospital list if open
+                const findHospitalBtn = document.getElementById('findHospitalBtn');
+                const hospitalListContainer = document.getElementById('hospitalListContainer');
+                if (hospitalListContainer && !hospitalListContainer.classList.contains('hidden')) {
+                    findHospitalBtn.click();
+                    setTimeout(() => findHospitalBtn.click(), 50);
+                }
+            }
+            closeChecklist();
+            showToast("Awesome! Thank you for your life-saving donation!");
+        });
+
+        // Close on outside click
+        checklistModal.addEventListener('click', (e) => {
+            if (e.target === checklistModal) {
+                closeChecklist();
+            }
+        });
+        
+        // Initial render
+        renderActiveRequests();
+
+        requestBloodForm.addEventListener('submit', (e) => {
+            e.preventDefault(); // Prevents page reload
+            
+            // Extract values
+            const name = document.getElementById('reqPatientName').value;
+            const bloodType = document.getElementById('reqBloodType').value;
+            const hospital = document.getElementById('reqHospital').value;
+            const units = document.getElementById('reqUnits').value;
+            
+            // Add new request to beginning of array
+            activeRequestsFeed.unshift({
+                id: Date.now(),
+                name: name,
+                type: bloodType,
+                hospital: hospital,
+                units: units,
+                urgency: "Critical",
+                time: "Just now"
+            });
+            
+            // Re-render feed
+            renderActiveRequests();
+            
+            closeRequestModal();
+            showToast("URGENT: Blood request has been broadcasted to local donors!");
+            
+            // Optionally trigger notification API here if permitted
+            if ("Notification" in window && Notification.permission === "granted") {
+                new Notification("LifeLink Request Sent", {
+                    body: "Your request has been successfully broadcasted nearby."
+                });
+            }
+            
+            // Scroll to feed so user sees their new request
+            document.getElementById('active-requests').scrollIntoView({ behavior: 'smooth' });
+        });
+
+        // ==========================================
+        // ADDED FOR EXERCISE 3: JAVASCRIPT EVENTS
+        // ==========================================
+
+        // 1. Load Event
+        window.addEventListener('load', () => {
+            // Welcome user when page loads after a short delay for better UX
+            setTimeout(() => {
+                showToast("Welcome to LifeLink! Ready to save lives.");
+            }, 1000);
+        });
+
+        // 2. Mouseover & Mouseout Events
+        const featureCards = document.querySelectorAll('.feature-card');
+        featureCards.forEach(card => {
+            card.addEventListener('mouseover', () => {
+                // Highlight feature cards
+                card.classList.remove('shadow-sm', 'border-gray-100');
+                card.classList.add('shadow-lg', 'border-primary-300', 'scale-105', '-translate-y-1');
+            });
+            card.addEventListener('mouseout', () => {
+                // Restore original card appearance
+                card.classList.remove('shadow-lg', 'border-primary-300', 'scale-105', '-translate-y-1');
+                card.classList.add('shadow-sm', 'border-gray-100');
+            });
+        });
+
+        // 3. Input, Focus, and Blur Events
+        const fullNameInput = document.getElementById('fullNameInput');
+        const nameDisplay = document.getElementById('nameDisplay');
+        const charCount = document.getElementById('charCount');
+
+        if (fullNameInput) {
+            // Input Event - Display typed text dynamically and live character count
+            fullNameInput.addEventListener('input', (e) => {
+                const text = e.target.value;
+                nameDisplay.textContent = text ? `Welcome, ${text}!` : '';
+                charCount.textContent = `${text.length}/50 characters`;
+                
+                if (text.length > 40) {
+                    charCount.classList.add('text-secondary-500');
+                } else {
+                    charCount.classList.remove('text-secondary-500');
+                }
+            });
+
+            // Focus Event - Highlight form fields when selected
+            fullNameInput.addEventListener('focus', (e) => {
+                e.target.classList.add('bg-blue-50', 'ring-2', 'ring-blue-200', 'border-blue-400');
+            });
+
+            // Blur Event - Remove highlight when focus is lost
+            fullNameInput.addEventListener('blur', (e) => {
+                e.target.classList.remove('bg-blue-50', 'ring-2', 'ring-blue-200', 'border-blue-400');
+            });
+        }
+    </script>
+</body>
+</html>

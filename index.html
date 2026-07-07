@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LifeLink - Hyper-local Emergency Donor Network</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        heading: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        blood: {
+                            50: '#fdf2f2',
+                            100: '#fde8e8',
+                            500: '#ef4444',
+                            600: '#dc2626',
+                            700: '#b91c1c',
+                            900: '#7f1d1d',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-blood-50 text-gray-800 font-sans min-h-screen flex flex-col justify-between selection:bg-blood-600 selection:text-white relative">
+
+    <!-- Header / Brand -->
+    <header class="bg-white border-b border-blood-100 py-5 px-4 shadow-sm sticky top-0 z-40">
+        <div class="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-blood-600 flex items-center justify-center text-white shadow-md">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-extrabold font-heading text-gray-900 tracking-tight">Life<span class="text-blood-600">Link</span></h1>
+                    <p class="text-xs text-gray-500 font-medium uppercase tracking-wider">Hyper-Local Emergency Network</p>
+                </div>
+            </div>
+            
+            <!-- Login & Register Buttons -->
+            <div class="flex items-center gap-3 w-full sm:w-auto justify-end" id="authButtons">
+                <button onclick="openModal('login')" class="flex-1 sm:flex-none text-center bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold px-5 py-2.5 rounded-xl transition-all text-sm border border-gray-200 cursor-pointer">
+                    Login
+                </button>
+                <button onclick="openModal('register')" class="flex-1 sm:flex-none text-center bg-blood-600 hover:bg-blood-700 text-white font-bold px-6 py-2.5 rounded-xl shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 text-sm flex items-center justify-center gap-1.5 cursor-pointer">
+                    <span>Register</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                </button>
+            </div>
+
+            <!-- Logged In User State (Hidden by default) -->
+            <div class="hidden items-center gap-3 w-full sm:w-auto justify-end" id="userProfileState">
+                <span class="text-sm font-semibold text-gray-700" id="welcomeText">Welcome, User</span>
+                <a href="blood_donor_prototype_v2.html" class="bg-blood-600 hover:bg-blood-700 text-white font-bold px-4 py-2 rounded-xl text-xs shadow-sm flex items-center gap-1">
+                    <span>Dashboard</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                </a>
+                <button onclick="logoutUser()" class="text-xs text-gray-500 hover:text-red-600 underline cursor-pointer">Logout</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-4xl mx-auto px-4 py-12 flex-grow space-y-12">
+        
+        <!-- Hero Title -->
+        <div class="text-center space-y-4 max-w-2xl mx-auto">
+            <h2 class="text-3xl sm:text-5xl font-extrabold font-heading text-gray-900 leading-tight">
+                When Every Second Counts, <span class="text-blood-600">We Connect Lives Instantly.</span>
+            </h2>
+            <p class="text-gray-600 text-base sm:text-lg">
+                Streamlining emergency blood donation without relying on viral social media luck.
+            </p>
+        </div>
+
+        <!-- Our Mission Box -->
+        <section class="bg-white p-8 sm:p-10 rounded-2xl shadow-sm border border-blood-100 relative overflow-hidden">
+            <div class="w-1.5 h-full bg-blood-600 absolute top-0 left-0"></div>
+            <h3 class="text-xl font-bold font-heading text-blood-700 uppercase tracking-wide mb-3 flex items-center gap-2">
+                <span>🎯 Our Mission</span>
+            </h3>
+            <p class="text-gray-700 text-lg leading-relaxed">
+                In critical emergencies, every second counts. Finding a blood donor through scattered social media posts is often inefficient and stressful. Our platform streamlines this process by creating a <strong class="text-gray-900">hyper-local network</strong> that connects those in need with those ready to help, instantly.
+            </p>
+        </section>
+
+        <!-- Who We Serve Grid -->
+        <section class="space-y-6">
+            <h3 class="text-2xl font-bold font-heading text-gray-900 text-center">Who We Serve</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-blood-100 space-y-2">
+                    <div class="text-2xl font-bold text-blood-600">👨‍👩‍👧 Patients' Families</div>
+                    <p class="text-gray-600 text-sm leading-relaxed">
+                        Instantly broadcast urgent needs to eligible, nearby donors without relying on viral social media luck.
+                    </p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-blood-100 space-y-2">
+                    <div class="text-2xl font-bold text-blood-600">🩸 Volunteer Donors</div>
+                    <p class="text-gray-600 text-sm leading-relaxed">
+                        Receive targeted, localized alerts when someone nearby urgently needs your specific blood type.
+                    </p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-blood-100 space-y-2">
+                    <div class="text-2xl font-bold text-blood-600">🏥 Local Hospitals</div>
+                    <p class="text-gray-600 text-sm leading-relaxed">
+                        Coordinate emergency supplies efficiently and manage local inventory with real-time donor matching.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Why It Matters -->
+        <section class="bg-gradient-to-r from-blood-900 to-gray-900 text-white p-8 sm:p-10 rounded-2xl shadow-md text-center space-y-4">
+            <h3 class="text-2xl font-bold font-heading text-blood-100">Why It Matters</h3>
+            <p class="text-gray-200 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
+                By focusing on <strong class="text-white underline decoration-blood-500 decoration-2">real-time proximity</strong> and strict <strong class="text-white underline decoration-blood-500 decoration-2">blood compatibility</strong>, we reduce the time it takes to find a donor from hours to minutes. This ensures that healthcare providers can focus on saving lives rather than searching for resources.
+            </p>
+        </section>
+
+        <!-- How It Works Steps -->
+        <section class="space-y-6">
+            <h3 class="text-2xl font-bold font-heading text-gray-900 text-center">How It Works</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-blood-100 text-center space-y-2">
+                    <div class="w-8 h-8 rounded-full bg-blood-100 text-blood-700 font-bold mx-auto flex items-center justify-center">1</div>
+                    <h4 class="font-bold text-gray-900">Request</h4>
+                    <p class="text-xs text-gray-600">Patient or hospital submits an emergency blood request detailing the requirement.</p>
+                </div>
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-blood-100 text-center space-y-2">
+                    <div class="w-8 h-8 rounded-full bg-blood-100 text-blood-700 font-bold mx-auto flex items-center justify-center">2</div>
+                    <h4 class="font-bold text-gray-900">Match</h4>
+                    <p class="text-xs text-gray-600">Our system instantly finds nearby donors with compatible blood types.</p>
+                </div>
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-blood-100 text-center space-y-2">
+                    <div class="w-8 h-8 rounded-full bg-blood-100 text-blood-700 font-bold mx-auto flex items-center justify-center">3</div>
+                    <h4 class="font-bold text-gray-900">Alert</h4>
+                    <p class="text-xs text-gray-600">Eligible local donors receive immediate push notifications on their devices.</p>
+                </div>
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-blood-100 text-center space-y-2">
+                    <div class="w-8 h-8 rounded-full bg-blood-600 text-white font-bold mx-auto flex items-center justify-center">4</div>
+                    <h4 class="font-bold text-gray-900">Connect</h4>
+                    <p class="text-xs text-gray-600">Donor accepts the request and is directed to the medical facility to donate.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Bottom Call to Action Register & Login -->
+        <div class="text-center pt-6 space-y-4">
+            <h3 class="text-xl font-bold font-heading text-gray-900">Ready to Join the Emergency Network?</h3>
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-md mx-auto">
+                <button onclick="openModal('register')" class="w-full sm:w-auto flex-1 text-center bg-blood-600 hover:bg-blood-700 text-white font-extrabold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5 text-base flex items-center justify-center gap-2 cursor-pointer">
+                    <span>Register as Donor</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                </button>
+                <button onclick="openModal('login')" class="w-full sm:w-auto flex-1 text-center bg-white hover:bg-gray-100 text-gray-800 font-bold px-8 py-4 rounded-xl shadow-md border border-gray-200 transition-all text-base cursor-pointer">
+                    Login to Account
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-blood-100 py-6 text-center text-xs text-gray-500">
+        <p>&copy; 2026 LifeLink Network. Connecting communities to optimize emergency healthcare.</p>
+    </footer>
+
+    <!-- Auth Modal (Login / Register) -->
+    <div id="authModal" class="fixed inset-0 bg-gray-900/70 backdrop-blur-sm hidden items-center justify-center z-50 px-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-gray-100 transform transition-all">
+            
+            <!-- Modal Header / Tabs -->
+            <div class="flex border-b border-gray-200 bg-gray-50">
+                <button id="tabLoginBtn" onclick="switchTab('login')" class="flex-1 py-4 text-center font-bold font-heading text-sm text-gray-600 border-b-2 border-transparent hover:text-gray-900 transition-colors">
+                    Login
+                </button>
+                <button id="tabRegisterBtn" onclick="switchTab('register')" class="flex-1 py-4 text-center font-bold font-heading text-sm text-blood-600 border-b-2 border-blood-600 hover:text-blood-700 transition-colors">
+                    Register as Donor
+                </button>
+                <button onclick="closeModal()" class="px-4 text-gray-400 hover:text-gray-600 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+
+            <div class="p-6">
+                
+                <!-- LOGIN FORM -->
+                <form id="loginForm" class="space-y-4 hidden" onsubmit="handleLogin(event)">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Email or Phone Number</label>
+                        <input type="text" id="loginEmail" required placeholder="e.g. jbnjijo@gmail.com or 9876543210" class="w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:outline-none focus:border-blood-600 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Password</label>
+                        <input type="password" id="loginPassword" required placeholder="••••••••" class="w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:outline-none focus:border-blood-600 text-sm">
+                    </div>
+                    <div class="flex items-center justify-between text-xs text-gray-500">
+                        <label class="flex items-center gap-1.5 cursor-pointer">
+                            <input type="checkbox" checked class="rounded text-blood-600 focus:ring-0"> Remember me
+                        </label>
+                        <a href="#" onclick="alert('Password reset link sent to your email/phone!'); return false;" class="text-blood-600 hover:underline">Forgot password?</a>
+                    </div>
+                    <button type="submit" class="w-full bg-blood-600 hover:bg-blood-700 text-white font-extrabold py-3 rounded-xl shadow-md transition-all text-sm">
+                        Login to Dashboard →
+                    </button>
+                </form>
+
+                <!-- REGISTER FORM -->
+                <form id="registerForm" class="space-y-4" onsubmit="handleRegister(event)">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Full Name</label>
+                        <input type="text" id="regName" required placeholder="e.g. Jibin Jijo" class="w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:outline-none focus:border-blood-600 text-sm">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Phone Number</label>
+                            <input type="tel" id="regPhone" required placeholder="9207293021" class="w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:outline-none focus:border-blood-600 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Blood Group</label>
+                            <select id="regBlood" required class="w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:outline-none focus:border-blood-600 text-sm bg-white font-bold text-blood-600">
+                                <option value="">Select</option>
+                                <option value="A+">A+</option>
+                                <option value="A-">A-</option>
+                                <option value="B+">B+</option>
+                                <option value="B-">B-</option>
+                                <option value="O+">O+</option>
+                                <option value="O-">O-</option>
+                                <option value="AB+">AB+</option>
+                                <option value="AB-">AB-</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Email Address</label>
+                        <input type="email" id="regEmail" required placeholder="jbnjijo@gmail.com" class="w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:outline-none focus:border-blood-600 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Create Password</label>
+                        <input type="password" id="regPassword" required placeholder="••••••••" class="w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:outline-none focus:border-blood-600 text-sm">
+                    </div>
+                    <div class="bg-blood-50 p-3 rounded-lg border border-blood-100 text-xs text-blood-900 flex items-center gap-2">
+                        <span>🛡️</span>
+                        <span><strong>Hospital Guarantee:</strong> Donations only occur at verified medical facilities.</span>
+                    </div>
+                    <button type="submit" class="w-full bg-blood-600 hover:bg-blood-700 text-white font-extrabold py-3 rounded-xl shadow-md transition-all text-sm">
+                        Complete Registration & Enter →
+                    </button>
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-6 right-6 bg-gray-900 text-white px-5 py-3.5 rounded-xl shadow-2xl border border-gray-700 transition-all duration-300 opacity-0 translate-y-2 pointer-events-none z-50 flex items-center gap-3 text-sm font-medium">
+        <span class="w-2 h-2 rounded-full bg-green-400 animate-ping"></span>
+        <span id="toastMessage"></span>
+    </div>
+
+    <script>
+        // Modal & Tab Logic
+        const authModal = document.getElementById('authModal');
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+        const tabLoginBtn = document.getElementById('tabLoginBtn');
+        const tabRegisterBtn = document.getElementById('tabRegisterBtn');
+
+        function openModal(tab) {
+            authModal.classList.remove('hidden');
+            authModal.classList.add('flex');
+            switchTab(tab);
+        }
+
+        function closeModal() {
+            authModal.classList.add('hidden');
+            authModal.classList.remove('flex');
+        }
+
+        function switchTab(tab) {
+            if (tab === 'login') {
+                loginForm.classList.remove('hidden');
+                registerForm.classList.add('hidden');
+                
+                tabLoginBtn.classList.add('border-blood-600', 'text-blood-600');
+                tabLoginBtn.classList.remove('border-transparent', 'text-gray-600');
+                
+                tabRegisterBtn.classList.remove('border-blood-600', 'text-blood-600');
+                tabRegisterBtn.classList.add('border-transparent', 'text-gray-600');
+            } else {
+                registerForm.classList.remove('hidden');
+                loginForm.classList.add('hidden');
+                
+                tabRegisterBtn.classList.add('border-blood-600', 'text-blood-600');
+                tabRegisterBtn.classList.remove('border-transparent', 'text-gray-600');
+                
+                tabLoginBtn.classList.remove('border-blood-600', 'text-blood-600');
+                tabLoginBtn.classList.add('border-transparent', 'text-gray-600');
+            }
+        }
+
+        // Close modal when clicking outside
+        authModal.addEventListener('click', (e) => {
+            if (e.target === authModal) {
+                closeModal();
+            }
+        });
+
+        // Toast Helper
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMessage').textContent = msg;
+            toast.classList.remove('opacity-0', 'translate-y-2');
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+            }, 3000);
+        }
+
+        // Check if user is already logged in
+        function checkLoginState() {
+            const activeUser = localStorage.getItem('lifelink_user');
+            const authButtons = document.getElementById('authButtons');
+            const userProfileState = document.getElementById('userProfileState');
+            const welcomeText = document.getElementById('welcomeText');
+
+            if (activeUser) {
+                const user = JSON.parse(activeUser);
+                authButtons.classList.add('hidden');
+                userProfileState.classList.remove('hidden');
+                userProfileState.classList.add('flex');
+                welcomeText.textContent = `Welcome, ${user.name} (${user.blood || 'Donor'})`;
+            } else {
+                authButtons.classList.remove('hidden');
+                userProfileState.classList.add('hidden');
+                userProfileState.classList.remove('flex');
+            }
+        }
+
+        // Handle Register Submission
+        function handleRegister(e) {
+            e.preventDefault();
+            const name = document.getElementById('regName').value;
+            const phone = document.getElementById('regPhone').value;
+            const blood = document.getElementById('regBlood').value;
+            const email = document.getElementById('regEmail').value;
+
+            const newUser = { name, phone, blood, email };
+            
+            // Save to LocalStorage
+            localStorage.setItem('lifelink_user', JSON.stringify(newUser));
+            
+            closeModal();
+            checkLoginState();
+            showToast(`🎉 Registration successful! Redirecting to dashboard...`);
+            
+            // Auto redirect after 1.5 seconds
+            setTimeout(() => {
+                window.location.href = "blood_donor_prototype_v2.html";
+            }, 1500);
+        }
+
+        // Handle Login Submission
+        function handleLogin(e) {
+            e.preventDefault();
+            const identifier = document.getElementById('loginEmail').value;
+            
+            // Check existing user or create a generic session
+            let user = localStorage.getItem('lifelink_user');
+            if (user) {
+                user = JSON.parse(user);
+            } else {
+                user = { name: identifier.split('@')[0] || "Volunteer Donor", blood: "O+" };
+                localStorage.setItem('lifelink_user', JSON.stringify(user));
+            }
+
+            closeModal();
+            checkLoginState();
+            showToast(`✅ Logged in successfully! Taking you to prototype...`);
+            
+            // Auto redirect after 1.5 seconds
+            setTimeout(() => {
+                window.location.href = "blood_donor_prototype_v2.html";
+            }, 1500);
+        }
+
+        // Logout logic
+        function logoutUser() {
+            localStorage.removeItem('lifelink_user');
+            checkLoginState();
+            showToast("Logged out successfully.");
+        }
+
+        // Initialize state on page load
+        checkLoginState();
+    </script>
+</body>
+</html>
