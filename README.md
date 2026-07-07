@@ -16,6 +16,7 @@ LifeLink is a modern, responsive web application and emergency network designed 
 │   └── styles.css              # Custom styling, animations, and responsive layouts
 ├── js/
 │   ├── tailwind-config.js      # Shared theme configuration and blood palette tokens
+│   ├── supabase-config.js      # Supabase client initialization & API credentials
 │   ├── auth.js                 # Authentication logic and session management
 │   └── app.js                  # Geolocation, screener, drag-and-drop, and feed logic
 └── supabase/
