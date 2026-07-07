@@ -253,6 +253,18 @@ if (protoRegisterForm) {
         const email = document.getElementById('protoRegEmail')?.value || `donor_${Date.now()}@test.com`;
         const password = document.getElementById('protoRegPassword')?.value || "DefaultPass123!";
 
+        // JS Validation for Email / Gmail and Phone Number
+        if (typeof window.isValidEmail === 'function' && !window.isValidEmail(email)) {
+            showToast("⚠️ Please enter a valid Email / Gmail address (e.g., name@gmail.com)");
+            document.getElementById('protoRegEmail')?.focus();
+            return;
+        }
+        if (typeof window.isValidPhone === 'function' && !window.isValidPhone(phone)) {
+            showToast("⚠️ Please enter a valid 10-digit Phone Number (e.g., 9876543210)");
+            document.getElementById('protoRegPhone')?.focus();
+            return;
+        }
+
         const submitBtn = document.getElementById('completeRegistrationBtn');
         const originalText = submitBtn ? submitBtn.textContent : "";
         if (submitBtn) {

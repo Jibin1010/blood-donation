@@ -1,5 +1,5 @@
 /**
- * LifeLink - Authentication & Modal Logic (With Supabase Integration)
+ * LifeLink - Authentication & Modal Logic (With Supabase Integration & Validation)
  * Uses window.supabaseClient (set in supabase-config.js) to avoid CDN naming collision.
  */
 
@@ -122,7 +122,7 @@ async function checkLoginState() {
     }
 }
 
-// Handle Register Submission
+// Handle Register Submission with Validation
 async function handleRegister(e) {
     e.preventDefault();
     const name = document.getElementById('regName').value;
@@ -130,6 +130,18 @@ async function handleRegister(e) {
     const blood = document.getElementById('regBlood').value || 'O+';
     const email = document.getElementById('regEmail').value;
     const password = document.getElementById('regPassword')?.value || "DefaultPass123!";
+
+    // 1. JS Validation for Email / Gmail and Phone Number
+    if (typeof window.isValidEmail === 'function' && !window.isValidEmail(email)) {
+        showToast("⚠️ Please enter a valid Email / Gmail address (e.g., name@gmail.com)");
+        document.getElementById('regEmail')?.focus();
+        return;
+    }
+    if (typeof window.isValidPhone === 'function' && !window.isValidPhone(phone)) {
+        showToast("⚠️ Please enter a valid 10-digit Phone Number (e.g., 9876543210)");
+        document.getElementById('regPhone')?.focus();
+        return;
+    }
 
     const submitBtn = e.target.querySelector('button[type="submit"]');
     const originalText = submitBtn ? submitBtn.textContent : "";
@@ -207,27 +219,60 @@ async function handleRegister(e) {
     }, 1500);
 }
 
-// Handle Login Submission
+// Handle Login Submission with Validation & Phone Lookup Support
 async function handleLogin(e) {
     e.preventDefault();
-    const identifier = document.getElementById('loginEmail').value;
+    const identifier = document.getElementById('loginEmail').value.trim();
     const password = document.getElementById('loginPassword')?.value || "";
 
     const submitBtn = e.target.querySelector('button[type="submit"]');
     const originalText = submitBtn ? submitBtn.textContent : "";
+
+    // 1. JS Validation: Must be either a valid Email / Gmail or a valid Phone Number
+    const isEmailValid = typeof window.isValidEmail === 'function' ? window.isValidEmail(identifier) : identifier.includes('@');
+    const isPhoneValid = typeof window.isValidPhone === 'function' ? window.isValidPhone(identifier) : !isNaN(identifier) && identifier.length >= 10;
+
+    if (!isEmailValid && !isPhoneValid) {
+        showToast("⚠️ Please enter a valid Gmail / Email address or 10-digit Phone Number");
+        document.getElementById('loginEmail')?.focus();
+        return;
+    }
+
     if (submitBtn) {
         submitBtn.disabled = true;
         submitBtn.textContent = "Authenticating...";
     }
 
     let user = null;
+    let loginEmail = identifier;
 
-    if (sb && identifier.includes('@') && password) {
+    if (sb && password) {
         try {
-            const { data, error } = await sb.auth.signInWithPassword({
-                email: identifier,
-                password: password,
-            });
+            // If user entered a phone number, look up their associated email address in public.profiles!
+            if (!isEmailValid && isPhoneValid) {
+                console.log("🔍 Phone login detected. Looking up email for phone:", identifier);
+                const { data: profile, error: lookupErr } = await sb
+                    .from('profiles')
+                    .select('email')
+                    .eq('phone_number', identifier)
+                    .maybeSingle();
+
+                if (profile && profile.email) {
+                    console.log("✅ Found associated email for phone number:", profile.email);
+                    loginEmail = profile.email;
+                } else {
+                    console.warn("Could not find email for phone number in public.profiles.");
+                }
+            }
+
+            let authResult;
+            if (typeof window.isValidEmail === 'function' && window.isValidEmail(loginEmail)) {
+                authResult = await sb.auth.signInWithPassword({ email: loginEmail, password: password });
+            } else {
+                authResult = await sb.auth.signInWithPassword({ phone: loginEmail, password: password });
+            }
+
+            const { data, error } = authResult;
 
             if (error) {
                 console.error("Supabase SignIn Error:", error.message);
@@ -240,7 +285,7 @@ async function handleLogin(e) {
             } else if (data?.user) {
                 const meta = data.user.user_metadata || {};
                 user = {
-                    name: meta.full_name || identifier.split('@')[0] || "Donor",
+                    name: meta.full_name || loginEmail.split('@')[0] || "Donor",
                     blood: meta.blood_group || "O+",
                     email: data.user.email
                 };

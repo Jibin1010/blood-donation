@@ -21,3 +21,20 @@ if (_supabaseLib && typeof _supabaseLib.createClient === 'function') {
 } else {
     console.error("❌ Supabase SDK CDN did not load. Check your internet connection or script order in HTML.");
 }
+
+// Global Validation Helpers for Email/Gmail and Phone Number
+window.isValidEmail = function(email) {
+    if (!email) return false;
+    // Enforces valid email format (e.g., user@domain.tld or user@gmail.com)
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return emailRegex.test(email.trim());
+};
+
+window.isValidPhone = function(phone) {
+    if (!phone) return false;
+    // Verifies a valid 10 to 15 digit mobile phone number
+    const cleaned = phone.replace(/[\s\-()]/g, '');
+    const phoneRegex = /^(\+?\d{1,3})?\d{10}$/;
+    const digitsOnly = cleaned.replace(/\D/g, '');
+    return phoneRegex.test(cleaned) && digitsOnly.length >= 10 && digitsOnly.length <= 15;
+};
