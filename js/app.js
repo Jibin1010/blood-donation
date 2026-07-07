@@ -246,6 +246,7 @@ const protoRegisterForm = document.getElementById('protoRegisterForm');
 if (protoRegisterForm) {
     protoRegisterForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+        const sb = window.supabaseClient;
         const name = document.getElementById('protoRegName')?.value || "Anonymous Donor";
         const phone = document.getElementById('protoRegPhone')?.value || "0000000000";
         const blood = document.getElementById('protoRegBlood')?.value || "O+";
@@ -259,9 +260,10 @@ if (protoRegisterForm) {
             submitBtn.textContent = "Saving to Supabase...";
         }
 
-        if (typeof supabase !== 'undefined' && supabase) {
+        if (sb) {
             try {
-                const { data, error } = await supabase.auth.signUp({
+                console.log("📤 Signing up from dashboard:", { email, name, blood });
+                const { data, error } = await sb.auth.signUp({
                     email: email,
                     password: password,
                     options: {
@@ -275,36 +277,41 @@ if (protoRegisterForm) {
                 });
 
                 if (error) {
-                    console.error("Supabase SignUp Error:", error.message);
+                    console.error("❌ Supabase SignUp Error:", error.message);
                     showToast(`⚠️ Supabase Error: ${error.message}`);
                     if (submitBtn) {
                         submitBtn.disabled = false;
                         submitBtn.textContent = originalText;
                     }
-                    return; // Stop if database error occurs
-                } else {
-                    console.log("✅ Supabase registration success:", data);
-                    if (data?.user?.id) {
-                        console.log("Upserting profile into public.profiles...");
-                        const { error: profileErr } = await supabase.from('profiles').upsert({
-                            id: data.user.id,
-                            full_name: name,
-                            email: email,
-                            phone_number: phone,
-                            blood_group: blood || 'O+',
-                            role: 'donor',
-                            is_available_to_donate: true
-                        }, { onConflict: 'id' });
-                        if (profileErr) {
-                            console.warn("Notice saving profile directly:", profileErr.message);
-                        } else {
-                            console.log("✅ Profile inserted/updated in Supabase Table Editor successfully!");
-                        }
+                    return;
+                }
+
+                console.log("✅ Supabase registration success:", data);
+
+                if (data?.user?.id) {
+                    console.log("📤 Upserting profile into public.profiles...");
+                    const { data: profileData, error: profileErr } = await sb.from('profiles').upsert({
+                        id: data.user.id,
+                        full_name: name,
+                        email: email,
+                        phone_number: phone,
+                        blood_group: blood || 'O+',
+                        role: 'donor',
+                        is_available_to_donate: true
+                    }, { onConflict: 'id' });
+
+                    if (profileErr) {
+                        console.error("❌ Profile upsert error:", profileErr.message, profileErr);
+                    } else {
+                        console.log("✅ Profile saved to Supabase Table Editor!", profileData);
                     }
                 }
             } catch (err) {
-                console.error("Supabase exception:", err);
+                console.error("❌ Supabase exception:", err);
             }
+        } else {
+            console.error("❌ Supabase client is NULL. Check script order in HTML.");
+            showToast("⚠️ Supabase not connected.");
         }
 
         localStorage.setItem('lifelink_user', JSON.stringify({ name, phone, blood, email }));
